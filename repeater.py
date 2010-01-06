@@ -12,31 +12,45 @@ from sys import exit
 from urllib2 import HTTPError
 import tweepy
 
+def debug_print(text):
+    """Print text if debugging mode is on"""
+    if settings.debug:
+        print text
+
+
 def save_id(statefile,id):
     """Save last status ID to a file"""
     last_id = get_last_id(statefile)
 
     if last_id < id:
+        debug_print('Saving new ID %d to %s' % (id,statefile))
         f = open(statefile,'w')
         f.write(str(id)) # no trailing newline
         f.close()
-    # Don't need to do anything if for some reason the ID got smaller
+    else:
+        debug_print('Received smaller ID, not saving. Old: %d, New: %s' % (
+            last_id, id))
 
 
 def get_last_id(statefile):
     """Retrieve last status ID from a file"""
+
+    debug_print('Getting last ID from %s' % (statefile,))
     try:
         f = open(statefile,'r')
         id = int(f.read())
         f.close()
     except IOError:
+        debug_print('IOError raised, returning zero (0)')
         return 0
+    debug_print('Got %d' % (id,))
     return id
 
 
 def careful_retweet(api,reply):
     """Perform retweets while avoiding loops and spam"""
 
+    debug_print('Preparing to retweet #%d' % (reply.id,))
     normalized_tweet = reply.text.lower().strip()
 
     # Don't try to retweet our own tweets
@@ -61,6 +75,7 @@ def careful_retweet(api,reply):
     if normalized_tweet.split().count('@'+ reply.user.screen_name.lower()) > 0:
         return []
 
+    debug_print('Retweeting #%d' % (reply.id,))
     return api.retweet(id=reply.id)
 
 
@@ -70,9 +85,12 @@ def main():
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
 
     last_id = get_last_id(settings.lastid)
+
+    debug_print('Loading friends list')
     friends = [int(line.strip()) for line in open(settings.friend_list)]
 
     try:
+        debug_print('Retrieving mentions')
         replies = api.mentions()
     except Exception, e:    # quit on error here
         print e
@@ -95,6 +113,7 @@ def main():
             else:
                 save_id(settings.lastid,reply.id)
 
+    debug_print('Exiting cleanly')
 
 if __name__ == '__main__':
     try:

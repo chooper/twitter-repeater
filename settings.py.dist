@@ -3,6 +3,10 @@
 username=''
 password=''
 
+# Debugging mode
+# If this option is True then extra debugging info will be printed
+debug = False
+
 # Flat text files containing various
 friend_list='friends.txt'  # List of twitter IDs to retweet for
 ignore_list='ignore.txt'   # List of twitter screen names to ignore

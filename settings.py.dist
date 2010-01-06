@@ -1,0 +1,12 @@
+
+# Twitter username and password of the bot
+username=''
+password=''
+
+# Flat text files containing various
+friend_list='friends.txt'  # List of twitter IDs to retweet for
+ignore_list='ignore.txt'   # List of twitter screen names to ignore
+filtered_word_list='filter.txt'    # Ignore tweets if they contain these words
+
+last_id_file='lastid.txt'  # Last ID the bot "saw"
+

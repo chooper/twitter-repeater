@@ -8,7 +8,6 @@ password=''
 debug = False
 
 # Flat text files containing various
-friend_list='friends.txt'  # List of twitter IDs to retweet for
 ignore_list='ignore.txt'   # List of twitter screen names to ignore
 filtered_word_list='filter.txt'    # Ignore tweets if they contain these words
 

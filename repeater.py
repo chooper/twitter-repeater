@@ -87,7 +87,8 @@ def main():
     last_id = get_last_id(settings.lastid)
 
     debug_print('Loading friends list')
-    friends = [int(line.strip()) for line in open(settings.friend_list)]
+    friends = api.friends_ids()
+    debug_print('Friend list loaded, size: %d' % len(friends))
 
     try:
         debug_print('Retrieving mentions')

@@ -2,15 +2,17 @@
 
 """Retweets direct replies"""
 
+# imports
+from sys import exit
+import tweepy
 import settings
 
-# Load ignore and filtered word lists
-IGNORE_LIST = [line.lower().strip() for line in open(settings.ignore_list)]
-FILTER_WORDS = [line.lower().strip() for line in open(settings.filtered_word_list)]
-
-from sys import exit
+# import exceptions
 from urllib2 import HTTPError
-import tweepy
+
+# globals - The following is populated later by load_lists
+IGNORE_LIST = []
+FILTER_WORDS = []
 
 def debug_print(text):
     """Print text if debugging mode is on"""
@@ -47,8 +49,25 @@ def get_last_id(statefile):
     return id
 
 
+def load_lists(force=False):
+    """Load ignore and filtered word lists"""
+    debug_print('Loading ignore list')
+    if not IGNORE_LIST or force is True:
+        global IGNORE_LIST
+        IGNORE_LIST = [
+            line.lower().strip() for line in open(settings.ignore_list) ]
+
+    debug_print('Loading filtered word list')
+    if not FILTER_WORDS or force is True:
+        global FILTER_WORDS
+        FILTER_WORDS = [
+            line.lower().strip() for line in open(settings.filtered_word_list) ]
+
+
 def careful_retweet(api,reply):
     """Perform retweets while avoiding loops and spam"""
+
+    load_lists()
 
     debug_print('Preparing to retweet #%d' % (reply.id,))
     normalized_tweet = reply.text.lower().strip()

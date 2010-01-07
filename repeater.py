@@ -55,25 +55,25 @@ def careful_retweet(api,reply):
 
     # Don't try to retweet our own tweets
     if reply.user.screen_name.lower() == settings.username.lower():
-        return []
+        return
 
     # Don't retweet if the tweet is from an ignored user
     if reply.user.screen_name.lower() in IGNORE_LIST:
-        return []
+        return
 
     # Don't retweet if the tweet contains a filtered word
     for word in normalized_tweet.split():
         if word.lower().strip() in FILTER_WORDS:
-            return []
+            return
 
     # HACK: Don't retweet if tweet contains more usernames than words (roughly)
     username_count = normalized_tweet.count('@')
     if username_count >= len(normalized_tweet.split()) - username_count:
-        return []
+        return
 
     # Try to break retweet loops by counting the occurences tweeting user's name
     if normalized_tweet.split().count('@'+ reply.user.screen_name.lower()) > 0:
-        return []
+        return
 
     debug_print('Retweeting #%d' % (reply.id,))
     return api.retweet(id=reply.id)
@@ -104,7 +104,7 @@ def main():
         # ignore tweet if it's id is lower than our last tweeted id
         if reply.id > last_id and reply.user.id in friends:
             try:
-                statuses = careful_retweet(api,reply)
+                careful_retweet(api,reply)
             except HTTPError, e:
                 print e.code()
                 print e.read()

@@ -1,6 +1,51 @@
 #!/usr/bin/env python
 
-"""Retweets direct replies"""
+"""
+twitter-repeater is a bot that automatically retweets any tweets in which its name
+is "mentioned" in. In order for a tweet to be retweeted, the bot account must be
+following the original user who tweeted it, that user must not be on the ignore
+list, and the tweet must pass some basic quality tests.
+
+The idea was originally inspired by the @SanMo bot and was created so I could use
+something similar for New London, CT (@NLCT)
+
+It runs well on Linux but it should run just as well on Mac OSX or Windows.
+
+I use the following user Cron job to run the bot every 5 minutes:
+
+*/5     *       *       *       *       $HOME/twitter-repeater/repeater.py
+"""
+
+# Project: twitter-repeater
+# Author: Charles Hooper <chooper@plumata.com>
+#
+# Copyright (c) 2010, Charles Hooper
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without modification, 
+# are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+# list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice, this
+# list of conditions and the following disclaimer in the documentation and/or
+# other materials provided with the distribution.
+#
+# * Neither the name of Plumata LLC nor the names of its contributors may be
+# used to endorse or promote products derived from this software without specific prior
+# written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+# SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+# TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
 
 # imports
 from sys import exit

@@ -96,15 +96,16 @@ def get_last_id(statefile):
 
 def load_lists(force=False):
     """Load ignore and filtered word lists"""
+    global IGNORE_LIST
+    global FILTER_WORDS
+
     debug_print('Loading ignore list')
     if not IGNORE_LIST or force is True:
-        global IGNORE_LIST
         IGNORE_LIST = [
             line.lower().strip() for line in open(settings.ignore_list) ]
 
     debug_print('Loading filtered word list')
     if not FILTER_WORDS or force is True:
-        global FILTER_WORDS
         FILTER_WORDS = [
             line.lower().strip() for line in open(settings.filtered_word_list) ]
 

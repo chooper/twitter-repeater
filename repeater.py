@@ -175,8 +175,9 @@ def main():
             except Exception, e:
                 print 'e: %s' % e
                 print repr(e)
-            else:
-                save_id(settings.lastid,reply.id)
+
+            # we now skip tweets that cause errors
+            save_id(settings.lastid,reply.id)
 
     debug_print('Exiting cleanly')
 

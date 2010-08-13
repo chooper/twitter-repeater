@@ -145,8 +145,10 @@ def careful_retweet(api,reply):
 
 
 def main():
-    auth = tweepy.BasicAuthHandler(username=settings.username,
-        password=settings.password)
+    auth = tweepy.OAuthHandler(consumer_key=settings.consumer_key,
+        consumer_secret=settings.consumer_secret)
+    auth.set_access_token(settings.access_key, settings.access_secret)
+
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
 
     last_id = get_last_id(settings.lastid)

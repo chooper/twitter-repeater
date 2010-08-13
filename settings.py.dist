@@ -1,5 +1,6 @@
 
 # Twitter oauth details (http://dev.twitter.com/apps)
+username=''
 consumer_key=''
 consumer_secret=''
 access_key=''

@@ -27,15 +27,15 @@ def log(**kwargs):
 @contextmanager
 def measure(**kwargs):
     start = time.time()
-    status = {'when': 'start'}
+    status = {'status': 'starting'}
     log(**dict(kwargs.items() + status.items()))
     try:
         yield
     except Exception, e:
-        status = {'when': 'exception', 'exception': "'{0}'".format(e)}
+        status = {'status': 'err', 'exception': "'{0}'".format(e)}
         log(**dict(kwargs.items() + status.items()))
     else:
-        status = {'when': 'finish', 'duration': time.time() - start}
+        status = {'status': 'ok', 'duration': time.time() - start}
         log(**dict(kwargs.items() + status.items()))
 
 

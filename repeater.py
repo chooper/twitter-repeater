@@ -10,9 +10,11 @@ Please see the README at https://github.com/chooper/twitter-repeater/ for more i
 """
 
 # imports
-import os, time
+import os, time, json
 from sys import exit
+from urlparse import urlparse
 import tweepy
+import redis
 
 # import exceptions
 from urllib2 import HTTPError
@@ -27,6 +29,20 @@ def debug_print(text):
         print text
 
 
+def bus_emit(username,tweet):
+    redis_url = os.environ.get('REDIS_URL', os.environ.get('REDISTOGO_URL'))
+
+    if not redis_url:
+        return
+
+    r = redis.from_url(redis_url)
+
+    publish_key = 'repeater:{0}'.format(username.lower())
+    serialized_tweet = json.dumps(tweet)
+    debug_print(serialized_tweet)
+    r.publish(publish_key, serialized_tweet)
+
+
 def filter_or_retweet(api,reply):
     """Perform retweets while avoiding loops and spam"""
 
@@ -38,7 +54,7 @@ def filter_or_retweet(api,reply):
     # ignore tweet if we've already tweeted it
     if reply.retweeted:
         log(at='filter', reason='already_retweeted', tweet=reply.id)
-        continue
+        return
 
     # Don't try to retweet our own tweets
     if reply.user.screen_name.lower() == username.lower():
@@ -81,10 +97,12 @@ def main():
 
     validate_env()
 
+    username          = os.environ.get('TW_USERNAME')
     consumer_key      = os.environ.get('TW_CONSUMER_KEY')
     consumer_secret   = os.environ.get('TW_CONSUMER_SECRET')
     access_key        = os.environ.get('TW_ACCESS_TOKEN')
     access_secret     = os.environ.get('TW_ACCESS_TOKEN_SECRET')
+    redis_url         = os.environ.get('REDIS_URL')
 
     auth = tweepy.OAuthHandler(consumer_key=consumer_key,
         consumer_secret=consumer_secret)
@@ -104,9 +122,11 @@ def main():
     replies.reverse()
 
     for reply in replies:
-        # ignore tweet if it's not from someone we follow
+        # ignore tweet if it's not from someone we follow and send notification
+        # TODO: dedup on subsequent runs
         if reply.user.id not in friends:
             log(at='ignore', tweet=reply.id, reason='not_followed')
+            bus_emit(username, reply)
             continue
 
         try:

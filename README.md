@@ -17,6 +17,7 @@ Windows.
 2. Create a [Heroku](http://www.heroku.com) app: `heroku create`
 3. Go to [Twitter's Developer page](https://dev.twitter.com/apps) and create a new application
 4. Configure your Heroku app with the Oauth credentials twitter gave you
+
    ```
    heroku config:set TW_USERNAME=<twitter username> \
      TW_CONSUMER_KEY=... \
@@ -47,9 +48,10 @@ me a pull request if you find a mistake.
 2. Go to [Twitter's Developer page](https://dev.twitter.com/apps) and create a new application
 3. Configure your repeater app with the Oauth credentials twitter gave you
     1. `cp .env.sample .env` and fill in the environment variables
-4. Install dependencies: `pip install -r requirements.txt` (consider using a virtualenv)
+4. Install dependencies (consider a virtualenv): `pip install -r requirements.txt`
 5. Test that it works: `source .env ; ./repeater.py`
-6 Add a cronjob to run the bot:
+6. Add a cronjob to run the bot:
+
   ```
   */10     *       *       *       *       /path/to/repeater/repeater.py
   ```

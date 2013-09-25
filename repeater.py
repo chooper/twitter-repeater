@@ -13,6 +13,7 @@ Please see the README at https://github.com/chooper/twitter-repeater/ for more i
 import os, time, json
 from sys import exit
 from urlparse import urlparse
+from contextlib import contextmanager
 import tweepy
 import redis
 
@@ -23,6 +24,21 @@ def log(**kwargs):
     print ' '.join( "{0}={1}".format(k,v) for k,v in sorted(kwargs.items()) )
 
 
+@contextmanager
+def measure(**kwargs):
+    start = time.time()
+    status = {'when': 'start'}
+    log(**dict(kwargs.items() + status.items()))
+    try:
+        yield
+    except Exception, e:
+        status = {'when': 'exception', 'exception': "'{0}'".format(e)}
+        log(**dict(kwargs.items() + status.items()))
+    else:
+        status = {'when': 'finish', 'duration': time.time() - start}
+        log(**dict(kwargs.items() + status.items()))
+
+
 def debug_print(text):
     """Print text if debugging mode is on"""
     if os.environ.get('DEBUG'):
@@ -30,6 +46,7 @@ def debug_print(text):
 
 
 def bus_emit(username,tweet):
+    """Sends a tweet to a redis Pub/Sub channel"""
     redis_url = os.environ.get('REDIS_URL', os.environ.get('REDISTOGO_URL'))
 
     if not redis_url:
@@ -47,8 +64,6 @@ def bus_emit(username,tweet):
 
 def filter_or_retweet(api,reply):
     """Perform retweets while avoiding loops and spam"""
-
-    log(at='filter_or_retweet')
 
     username = os.environ.get('TW_USERNAME')
     normalized_tweet = reply.text.lower().strip()
@@ -112,20 +127,17 @@ def main():
 
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
 
-    log(at='load_friends_start')
-    friends = api.friends_ids()
-    log(at='load_friends_finish', friends=len(friends))
+    with measure(at='fetch_friends'):
+        friends = api.friends_ids()
 
-    log(at='load_mentions_start')
-    replies = api.mentions_timeline()
-    log(at='load_mentions_finish', mentions=len(replies))
+    with measure(at='fetch_mentions'):
+        replies = api.mentions_timeline()
 
-    # want these in ascending order, api orders them descending
-    replies.reverse()
+    log(at='fetched_from_api', friends=len(friends), mentions=len(replies))
 
-    for reply in replies:
+    for reply in reversed(replies):
         # ignore tweet if it's not from someone we follow and send notification
-        # TODO: dedup on subsequent runs
+        # TODO: dedup on subsequent runs?
         if reply.user.id not in friends:
             log(at='ignore', tweet=reply.id, reason='not_followed')
             bus_emit(username, reply)

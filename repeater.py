@@ -33,6 +33,7 @@ def bus_emit(username,tweet):
     redis_url = os.environ.get('REDIS_URL', os.environ.get('REDISTOGO_URL'))
 
     if not redis_url:
+        log(at='bus_emit', status='skipped', reason='no_redis_url')
         return
 
     r = redis.from_url(redis_url)
@@ -41,6 +42,7 @@ def bus_emit(username,tweet):
     serialized_tweet = json.dumps(tweet)
     debug_print(serialized_tweet)
     r.publish(publish_key, serialized_tweet)
+    log(at='bus_emit', status='ok')
 
 
 def filter_or_retweet(api,reply):

@@ -10,7 +10,7 @@ Please see the README at https://github.com/chooper/twitter-repeater/ for more i
 """
 
 # imports
-import os
+import os, time
 from sys import exit
 import tweepy
 
@@ -72,6 +72,7 @@ def validate_env():
 
 def main():
     log(at='main')
+    main_start = time.time()
 
     validate_env()
 
@@ -118,7 +119,7 @@ def main():
             log(at='rt_error', klass='Exception', msg="'{0}'".format(str(e)))
             debug_log('e: %s' % e)
 
-    log(at='finish', status='ok')
+    log(at='finish', status='ok', duration=time.time() - main_start)
 
 if __name__ == '__main__':
     try:

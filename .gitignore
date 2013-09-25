@@ -1,7 +1,5 @@
 # Project specific
-settings.py
 .env
-*.txt
 
 # Python-specific
 *.py[cod]

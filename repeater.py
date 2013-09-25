@@ -13,7 +13,6 @@ Please see the README at https://github.com/chooper/twitter-repeater/ for more i
 import os
 from sys import exit
 import tweepy
-import settings
 
 # import exceptions
 from urllib2 import HTTPError
@@ -22,35 +21,6 @@ def debug_print(text):
     """Print text if debugging mode is on"""
     if os.environ.get('DEBUG'):
         print text
-
-
-def save_id(statefile,id):
-    """Save last status ID to a file"""
-    last_id = get_last_id(statefile)
-
-    if last_id < id:
-        debug_print('Saving new ID %d to %s' % (id,statefile))
-        f = open(statefile,'w')
-        f.write(str(id)) # no trailing newline
-        f.close()
-    else:
-        debug_print('Received smaller ID, not saving. Old: %d, New: %s' % (
-            last_id, id))
-
-
-def get_last_id(statefile):
-    """Retrieve last status ID from a file"""
-
-    debug_print('Getting last ID from %s' % (statefile,))
-    try:
-        f = open(statefile,'r')
-        id = int(f.read())
-        f.close()
-    except IOError:
-        debug_print('IOError raised, returning zero (0)')
-        return 0
-    debug_print('Got %d' % (id,))
-    return id
 
 
 def careful_retweet(api,reply):
@@ -63,15 +33,13 @@ def careful_retweet(api,reply):
 
     # Don't try to retweet our own tweets
     if reply.user.screen_name.lower() == username.lower():
+        debug_print("Not retweeting: Own tweet")
         return
 
     # HACK: Don't retweet if tweet contains more usernames than words (roughly)
     username_count = normalized_tweet.count('@')
     if username_count >= len(normalized_tweet.split()) - username_count:
-        return
-
-    # Try to break retweet loops by counting the occurences tweeting user's name
-    if normalized_tweet.split().count('@'+ reply.user.screen_name.lower()) > 0:
+        debug_print("Not retweeting: Failed @ test")
         return
 
     debug_print('Retweeting #%d' % (reply.id,))
@@ -107,8 +75,6 @@ def main():
 
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
 
-    last_id = get_last_id(settings.last_id_file)
-
     debug_print('Loading friends list')
     friends = api.friends_ids()
     debug_print('Friend list loaded, size: %d' % len(friends))
@@ -124,19 +90,22 @@ def main():
     replies.reverse()
 
     for reply in replies:
-        # ignore tweet if it's id is lower than our last tweeted id
-        if reply.id > last_id and reply.user.id in friends:
-            try:
-                careful_retweet(api,reply)
-            except HTTPError, e:
-                print e.code()
-                print e.read()
-            except Exception, e:
-                print 'e: %s' % e
-                print repr(e)
+        # ignore twet if we've already tweeted it
+        if reply.retweeted:
+            continue
 
-            # we now skip tweets that cause errors
-            save_id(settings.last_id_file,reply.id)
+        # ignore tweet if it's not from someone we follow
+        if reply.user.id not in friends:
+            continue
+
+        try:
+            careful_retweet(api,reply)
+        except HTTPError, e:
+            print e.code()
+            print e.read()
+        except Exception, e:
+            print 'e: %s' % e
+            print repr(e)
 
     debug_print('Exiting cleanly')
 

@@ -27,10 +27,10 @@ def debug_print(text):
         print text
 
 
-def careful_retweet(api,reply):
+def filter_or_retweet(api,reply):
     """Perform retweets while avoiding loops and spam"""
 
-    log(at='careful_rt_start')
+    log(at='filter_or_retweet')
 
     username = os.environ.get('TW_USERNAME')
     normalized_tweet = reply.text.lower().strip()
@@ -110,7 +110,7 @@ def main():
             continue
 
         try:
-            careful_retweet(api,reply)
+            filter_or_retweet(api,reply)
         except HTTPError, e:
             log(at='rt_error', klass='HTTPError', code=e.code(), body_size=len(e.read()))
             debug_log(e.code())

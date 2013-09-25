@@ -35,6 +35,11 @@ def filter_or_retweet(api,reply):
     username = os.environ.get('TW_USERNAME')
     normalized_tweet = reply.text.lower().strip()
 
+    # ignore tweet if we've already tweeted it
+    if reply.retweeted:
+        log(at='filter', reason='already_retweeted', tweet=reply.id)
+        continue
+
     # Don't try to retweet our own tweets
     if reply.user.screen_name.lower() == username.lower():
         log(at='filter', reason='is_my_tweet', tweet=reply.id)
@@ -99,11 +104,6 @@ def main():
     replies.reverse()
 
     for reply in replies:
-        # ignore tweet if we've already tweeted it
-        if reply.retweeted:
-            log(at='ignore', tweet=reply.id, reason='already_retweeted')
-            continue
-
         # ignore tweet if it's not from someone we follow
         if reply.user.id not in friends:
             log(at='ignore', tweet=reply.id, reason='not_followed')

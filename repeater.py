@@ -6,17 +6,11 @@ is "mentioned" in. In order for a tweet to be retweeted, the bot account must be
 following the original user who tweeted it, that user must not be on the ignore
 list, and the tweet must pass some basic quality tests.
 
-The idea was originally inspired by the @SanMo bot and was created so I could use
-something similar for New London, CT (@NLCT)
-
-It runs well on Linux but it should run just as well on Mac OSX or Windows.
-
-I use the following user Cron job to run the bot every 5 minutes:
-
-*/5     *       *       *       *       $HOME/twitter-repeater/repeater.py
+Please see the README at https://github.com/chooper/twitter-repeater/ for more info
 """
 
 # imports
+import os
 from sys import exit
 import tweepy
 import settings
@@ -30,7 +24,7 @@ FILTER_WORDS = []
 
 def debug_print(text):
     """Print text if debugging mode is on"""
-    if settings.debug:
+    if os.environ.get('DEBUG'):
         print text
 
 
@@ -82,13 +76,14 @@ def load_lists(force=False):
 def careful_retweet(api,reply):
     """Perform retweets while avoiding loops and spam"""
 
+    username = os.environ.get('TW_USERNAME')
     load_lists()
 
     debug_print('Preparing to retweet #%d' % (reply.id,))
     normalized_tweet = reply.text.lower().strip()
 
     # Don't try to retweet our own tweets
-    if reply.user.screen_name.lower() == settings.username.lower():
+    if reply.user.screen_name.lower() == username.lower():
         return
 
     # Don't retweet if the tweet is from an ignored user
@@ -113,14 +108,36 @@ def careful_retweet(api,reply):
     return api.retweet(id=reply.id)
 
 
+def validate_env():
+    keys = [
+        'TW_USERNAME',
+        'TW_CONSUMER_KEY',
+        'TW_CONSUMER_SECRET',
+        'TW_ACCESS_TOKEN',
+        'TW_ACCESS_TOKEN_SECRET',
+        ]
+
+    for key in keys:
+        v = os.environ.get(key)
+        if not v:
+            raise ValueError("Missing ENV var: {0}".format(key))
+
+
 def main():
-    auth = tweepy.OAuthHandler(consumer_key=settings.consumer_key,
-        consumer_secret=settings.consumer_secret)
-    auth.set_access_token(settings.access_key, settings.access_secret)
+    validate_env()
+
+    consumer_key      = os.environ.get('TW_CONSUMER_KEY')
+    consumer_secret   = os.environ.get('TW_CONSUMER_SECRET')
+    access_key        = os.environ.get('TW_ACCESS_TOKEN')
+    access_secret     = os.environ.get('TW_ACCESS_TOKEN_SECRET')
+
+    auth = tweepy.OAuthHandler(consumer_key=consumer_key,
+        consumer_secret=consumer_secret)
+    auth.set_access_token(access_key, access_secret)
 
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
 
-    last_id = get_last_id(settings.lastid)
+    last_id = get_last_id(settings.last_id_file)
 
     debug_print('Loading friends list')
     friends = api.friends_ids()
@@ -128,7 +145,7 @@ def main():
 
     try:
         debug_print('Retrieving mentions')
-        replies = api.mentions()
+        replies = api.mentions_timeline()
     except Exception, e:    # quit on error here
         print e
         exit(1)
@@ -149,7 +166,7 @@ def main():
                 print repr(e)
 
             # we now skip tweets that cause errors
-            save_id(settings.lastid,reply.id)
+            save_id(settings.last_id_file,reply.id)
 
     debug_print('Exiting cleanly')
 

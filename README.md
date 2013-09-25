@@ -16,3 +16,15 @@ I use the following user Cron job to run the bot every 5 minutes.
 */5     *       *       *       *       $HOME/twitter-repeater/repeater.py
 ```
 
+## Configuration
+http://dev.twitter.com/apps
+
+```
+TW_USERNAME=
+TW_CONSUMER_KEY=
+TW_CONSUMER_SECRET=
+TW_ACCESS_TOKEN=
+TW_ACCESS_TOKEN_SECRET=
+DEBUG=
+```
+

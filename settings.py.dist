@@ -1,16 +1,4 @@
-
-# Twitter oauth details (http://dev.twitter.com/apps)
-username=''
-consumer_key=''
-consumer_secret=''
-access_key=''
-access_secret=''
-
-# Debugging mode
-# If this option is True then extra debugging info will be printed
-debug = False
-
-# Flat text files containing various
+# Flat text files containing various settings and state
 ignore_list='ignore.txt'   # List of twitter screen names to ignore
 filtered_word_list='filter.txt'    # Ignore tweets if they contain these words
 

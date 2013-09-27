@@ -46,22 +46,18 @@ def debug_print(text):
         print text
 
 
-def bus_emit(username,tweet):
+def bus_emit(username,tweet,redis_client=None):
     """Sends a tweet to a redis Pub/Sub channel"""
-    redis_url = os.environ.get('REDIS_URL', os.environ.get('REDISTOGO_URL'))
 
-    if not redis_url:
-        log(at='bus_emit', status='skipped', reason='no_redis_url')
+    if not redis_client:
+        log(at='bus_emit', status='skipped', reason='no_redis_client')
         return
-
-    r = redis.from_url(redis_url)
 
     publish_key = 'repeater:{0}'.format(username.lower())
     serialized_tweet = json.dumps(tweet)
     debug_print(serialized_tweet)
-    r.publish(publish_key, serialized_tweet)
+    redis_client.publish(publish_key, serialized_tweet)
     log(at='bus_emit', status='ok')
-    del r
 
 
 def filter_or_retweet(api,reply):
@@ -137,13 +133,20 @@ def main():
 
     log(at='fetched_from_api', friends=len(friends), mentions=len(replies))
 
+    # set up connection to redis if we're configured to
+    redis_url = os.environ.get('REDIS_URL', os.environ.get('REDISTOGO_URL'))
+    if redis_url:
+        redis_client = redis.from_url(redis_url)
+    else:
+        redis_client = None
+    
     for reply in reversed(replies):
         # ignore tweet if it's not from someone we follow and send notification
         # TODO: dedup on subsequent runs?
         if reply.user.id not in friends:
             log(at='ignore', tweet=reply.id, reason='not_followed')
             tweet_dict = dict(id=reply.id, user=reply.user.screen_name, text=reply.text)
-            bus_emit(username, tweet_dict)
+            bus_emit(username, tweet_dict, redis_client)
             continue
 
         try:
@@ -177,4 +180,3 @@ if __name__ == '__main__':
         if raven_client:
             raven_client.captureException()
         raise
-

@@ -140,7 +140,8 @@ def main():
         # TODO: dedup on subsequent runs?
         if reply.user.id not in friends:
             log(at='ignore', tweet=reply.id, reason='not_followed')
-            bus_emit(username, reply)
+            tweet_dict = dict(id=reply.id, userr=reply.user.screen_name, text=reply.text)
+            bus_emit(username, tweet_dict)
             continue
 
         try:

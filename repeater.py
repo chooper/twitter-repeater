@@ -60,8 +60,8 @@ def bus_emit(username,tweet):
     serialized_tweet = json.dumps(tweet)
     debug_print(serialized_tweet)
     r.publish(publish_key, serialized_tweet)
-    r.close()
     log(at='bus_emit', status='ok')
+    del r
 
 
 def filter_or_retweet(api,reply):

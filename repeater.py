@@ -60,6 +60,7 @@ def bus_emit(username,tweet):
     serialized_tweet = json.dumps(tweet)
     debug_print(serialized_tweet)
     r.publish(publish_key, serialized_tweet)
+    r.close()
     log(at='bus_emit', status='ok')
 
 
@@ -141,7 +142,7 @@ def main():
         # TODO: dedup on subsequent runs?
         if reply.user.id not in friends:
             log(at='ignore', tweet=reply.id, reason='not_followed')
-            tweet_dict = dict(id=reply.id, userr=reply.user.screen_name, text=reply.text)
+            tweet_dict = dict(id=reply.id, user=reply.user.screen_name, text=reply.text)
             bus_emit(username, tweet_dict)
             continue
 
@@ -159,9 +160,21 @@ def main():
     log(at='finish', status='ok', duration=time.time() - main_start)
 
 if __name__ == '__main__':
+    # set up raven/sentry
+    raven_url = os.environ.get('RAVEN_URL')
+    if raven_url:
+        import raven
+        raven_client = raven.Client(raven_url)
+    else:
+        raven_client = None
+
     try:
         main()
     except KeyboardInterrupt:
         log(at='keyboard_interrupt')
         quit()
+    except:
+        if raven_client:
+            raven_client.captureException()
+        raise
 

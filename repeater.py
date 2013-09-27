@@ -34,6 +34,7 @@ def measure(**kwargs):
     except Exception, e:
         status = {'status': 'err', 'exception': "'{0}'".format(e)}
         log(**dict(kwargs.items() + status.items()))
+        raise
     else:
         status = {'status': 'ok', 'duration': time.time() - start}
         log(**dict(kwargs.items() + status.items()))
@@ -153,6 +154,7 @@ def main():
         except Exception, e:
             log(at='rt_error', klass='Exception', msg="'{0}'".format(str(e)))
             debug_log('e: %s' % e)
+            raise
 
     log(at='finish', status='ok', duration=time.time() - main_start)
 

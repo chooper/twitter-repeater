@@ -71,6 +71,14 @@ def filter_or_retweet(api,reply):
     return api.retweet(id=reply.id)
 
 
+def notify_owner(api,owner,reply):
+    """Send a DM to the owner of the bot"""
+    if not owner:
+        return
+    msg = "{0} wants to be retweeted".format(reply.user.screen_name)
+    api.send_direct_message(user=owner, text=msg)
+
+
 def validate_env():
     keys = [
         'TW_USERNAME',
@@ -97,6 +105,7 @@ def main():
 
     validate_env()
 
+    owner_username    = os.environ.get('TW_OWNER_USERNAME')
     username          = os.environ.get('TW_USERNAME')
     consumer_key      = os.environ.get('TW_CONSUMER_KEY')
     consumer_secret   = os.environ.get('TW_CONSUMER_SECRET')
@@ -119,10 +128,15 @@ def main():
 
     for reply in reversed(replies):
         # ignore tweet if it's not from someone we follow and send notification
-        # TODO: dedup on subsequent runs?
         if reply.user.id not in friends:
-            log(at='ignore', tweet=reply.id, reason='not_followed')
-            tweet_dict = dict(id=reply.id, user=reply.user.screen_name, text=reply.text)
+            if not reply.favorited: # TODO: log "seen" status
+                prev_seen = "false"
+                api.create_favorite(id=reply.id)
+                notify_owner(api, owner_username, reply)
+            else:
+                prev_seen = "true"
+
+            log(at='ignore', tweet=reply.id, reason='not_followed', prev_seen=prev_seen)
             continue
 
         try:

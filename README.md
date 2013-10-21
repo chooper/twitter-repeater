@@ -19,7 +19,8 @@ Windows.
 4. Configure your Heroku app with the Oauth credentials twitter gave you
 
    ```
-   heroku config:set TW_USERNAME=<twitter username> \
+   heroku config:set TW_OWNER_USERNAME=<your twitter username> \
+      TW_USERNAME=<twitter username> \
      TW_CONSUMER_KEY=... \
      TW_CONSUMER_SECRET=... \
      TW_ACCESS_TOKEN=... \

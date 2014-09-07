@@ -131,8 +131,16 @@ def main():
         if reply.user.id not in friends:
             if not reply.favorited: # TODO: log "seen" status
                 prev_seen = "false"
-                api.create_favorite(id=reply.id)
-                notify_owner(api, owner_username, reply)
+
+                # sometimes this raises TweepError even if reply.favorited
+                # was False
+                try:
+                    api.create_favorite(id=reply.id)
+                except tweepy.TweepError, e:
+                    log(at='fav_error', tweet=reply.id, klass='TweepError', msg="'{0}'".format(str(e)))
+                else:
+                    log(at='favorite', tweet=reply.id)
+                    notify_owner(api, owner_username, reply)
             else:
                 prev_seen = "true"
 

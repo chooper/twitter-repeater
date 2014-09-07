@@ -71,6 +71,21 @@ def filter_or_retweet(api,reply):
     return api.retweet(id=reply.id)
 
 
+def fav_tweet(api,reply):
+    """Attempt to fav a tweet and return True if successful"""
+
+    # sometimes this raises TweepError even if reply.favorited
+    # was False
+    try:
+        api.create_favorite(id=reply.id)
+    except tweepy.TweepError, e:
+        log(at='fav_error', tweet=reply.id, klass='TweepError', msg="'{0}'".format(str(e)))
+        return False
+
+    log(at='favorite', tweet=reply.id)
+    return True
+
+
 def notify_owner(api,owner,reply):
     """Send a DM to the owner of the bot"""
     if not owner:
@@ -131,15 +146,8 @@ def main():
         if reply.user.id not in friends:
             if not reply.favorited: # TODO: log "seen" status
                 prev_seen = "false"
-
-                # sometimes this raises TweepError even if reply.favorited
-                # was False
-                try:
-                    api.create_favorite(id=reply.id)
-                except tweepy.TweepError, e:
-                    log(at='fav_error', tweet=reply.id, klass='TweepError', msg="'{0}'".format(str(e)))
-                else:
-                    log(at='favorite', tweet=reply.id)
+                status = fav_tweet(api, reply)
+                if status:
                     notify_owner(api, owner_username, reply)
             else:
                 prev_seen = "true"

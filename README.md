@@ -14,23 +14,9 @@ Windows.
 ## Heroku
 
 1. Check the code out of git: `git clone git@github.com:chooper/twitter-repeater.git`
-2. Create a [Heroku](http://www.heroku.com) app: `heroku create`
-3. Go to [Twitter's Developer page](https://dev.twitter.com/apps) and create a new application
-4. Configure your Heroku app with the Oauth credentials twitter gave you
-
-   ```
-   heroku config:set TW_OWNER_USERNAME=<your twitter username> \
-      TW_USERNAME=<twitter username> \
-     TW_CONSUMER_KEY=... \
-     TW_CONSUMER_SECRET=... \
-     TW_ACCESS_TOKEN=... \
-     TW_ACCESS_TOKEN_SECRET=... \
-     DEBUG=true
-   ```
-5. Push your application: `git push heroku master`
-6. Test that your repeater works: `heroku run ./repeater.py`
-7. Add the scheduler addon: `heroku addons:add scheduler:standard`
-8. Configure the scheduler to run the repeater every 10 minutes
+2. Click the Heroku button: [![Deploy](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+3. Fill in the fields after creating a new app on the [Twitter's Developer page](https://dev.twitter.com/apps)
+4. Configure the scheduler to run the repeater every 10 minutes
     1. `heroku addons:open scheduler`
     2. Click *Add Job* and enter:
         * **Task**: `./repeater.py`
@@ -38,7 +24,7 @@ Windows.
         * **Frequency**: `Every 10 minutes`
     3. Click *Save*
 
-That should be it! It seems like alot of steps but after this you're all done!
+You're all done!
 
 ## Traditional (Linux)
 

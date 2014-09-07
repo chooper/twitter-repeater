@@ -1,0 +1,36 @@
+{
+  "name": "twitter-repeater",
+  "description": "Automatically retweet any tweets mentioning the bot",
+  "website": "https://github.com/chooper/twitter-repeater",
+  "addons": ["scheduler:standard"],
+  "env": {
+    "TW_OWNER_USERNAME": {
+        "description": "Twitter account to tell about new followers",
+        "value": ""
+    },
+    "TW_USERNAME": {
+        "description": "The twitter username this bot runs as",
+        "value": ""
+    },
+    "TW_CONSUMER_KEY": {
+        "description": "oauth consumer key - create new app at https://apps.twitter.com/",
+        "value": ""
+    },
+    "TW_CONSUMER_SECRET": {
+        "description": "oauth consumer secret - create new app at https://apps.twitter.com/",
+        "value": ""
+    },
+    "TW_ACCESS_TOKEN": {
+        "description": "oauth access token - create new app at https://apps.twitter.com/",
+        "value": ""
+    },
+    "TW_CONSUMER_TOKEN_SECRET": {
+        "description": "oauth access token secret - create new app at https://apps.twitter.com/",
+        "value": ""
+    },
+    "DEBUG": {
+        "description": "Use debug logging?",
+        "value": "true"
+    }
+  }
+}

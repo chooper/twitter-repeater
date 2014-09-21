@@ -1,5 +1,6 @@
 argparse==1.2.1
-raven==3.5.0
 redis==2.8.0
+requests==2.4.1
+rollbar==0.9.0
 tweepy==2.1
 wsgiref==0.1.2

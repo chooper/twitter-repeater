@@ -179,13 +179,13 @@ def main():
     log(at='finish', status='ok', duration=time.time() - main_start)
 
 if __name__ == '__main__':
-    # set up raven/sentry
-    raven_url = os.environ.get('RAVEN_URL')
-    if raven_url:
-        import raven
-        raven_client = raven.Client(raven_url)
-    else:
-        raven_client = None
+    # set up rollbar
+    rollbar_configured = False
+    rollbar_access_key = os.environ.get('ROLLBAR_ACCESS_KEY')
+    if rollbar_access_key:
+        import rollbar
+        rollbar.init(rollbar_access_key, 'production')
+        rollbar_configured = True
 
     try:
         main()
@@ -193,6 +193,7 @@ if __name__ == '__main__':
         log(at='keyboard_interrupt')
         quit()
     except:
-        if raven_client:
-            raven_client.captureException()
+        if rollbar_configured:
+            rollbar.report_exc_info()
         raise
+

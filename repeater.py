@@ -91,7 +91,17 @@ def notify_owner(api,owner,reply):
     if not owner:
         return
     msg = "{0} wants to be retweeted".format(reply.user.screen_name)
-    api.send_direct_message(user=owner, text=msg)
+
+    # sometimes this raises TweepError if we end up sending notifications
+    # for the same user
+    try:
+        api.send_direct_message(user=owner, text=msg)
+    except tweepy.TweepError, e:
+        log(at='notify_error', tweet=reply.id, klass='TweepError', msg="'{0}'".format(str(e)))
+        return False
+
+    log(at='notify_owner', tweet=reply.id)
+    return True
 
 
 def validate_env():

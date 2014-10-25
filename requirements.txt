@@ -1,4 +1,5 @@
 argparse==1.2.1
+backoff==1.0.4
 redis==2.8.0
 requests==2.4.1
 rollbar==0.9.0

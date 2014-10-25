@@ -15,6 +15,7 @@ from sys import exit
 from urlparse import urlparse
 from contextlib import contextmanager
 import tweepy
+import backoff
 
 # import exceptions
 from urllib2 import HTTPError
@@ -124,6 +125,22 @@ def validate_env():
     log(at='validate_env', status='ok')
 
 
+@backoff.on_exception(backoff.expo, tweepy.TweepError, max_tries=8)
+def fetch_friends(api):
+    """Fetch friend list from twitter"""
+    with measure(at='fetch_friends'):
+        friends = api.friends_ids()
+    return friends
+
+
+@backoff.on_exception(backoff.expo, tweepy.TweepError, max_tries=8)
+def fetch_mentions(api):
+    """Fetch mentions from twitter"""
+    with measure(at='fetch_mentions'):
+        replies = api.mentions_timeline()
+    return replies
+
+
 def main():
     log(at='main')
     main_start = time.time()
@@ -142,12 +159,8 @@ def main():
     auth.set_access_token(access_key, access_secret)
 
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
-
-    with measure(at='fetch_friends'):
-        friends = api.friends_ids()
-
-    with measure(at='fetch_mentions'):
-        replies = api.mentions_timeline()
+    friends = fetch_friends(api)
+    replies = fetch_mentions(api)
 
     log(at='fetched_from_api', friends=len(friends), mentions=len(replies))
 

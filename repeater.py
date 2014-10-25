@@ -169,11 +169,11 @@ def main():
             filter_or_retweet(api,reply)
         except HTTPError, e:
             log(at='rt_error', klass='HTTPError', code=e.code(), body_size=len(e.read()))
-            debug_log(e.code())
-            debug_log(e.read())
+            debug_print(e.code())
+            debug_print(e.read())
         except Exception, e:
             log(at='rt_error', klass='Exception', msg="'{0}'".format(str(e)))
-            debug_log('e: %s' % e)
+            debug_print('e: %s' % e)
             raise
 
     log(at='finish', status='ok', duration=time.time() - main_start)

@@ -192,21 +192,11 @@ def main():
     log(at='finish', status='ok', duration=time.time() - main_start)
 
 if __name__ == '__main__':
-    # set up rollbar
-    rollbar_configured = False
-    rollbar_access_key = os.environ.get('ROLLBAR_ACCESS_KEY')
-    if rollbar_access_key:
-        import rollbar
-        rollbar.init(rollbar_access_key, 'production')
-        rollbar_configured = True
-
     try:
         main()
     except KeyboardInterrupt:
         log(at='keyboard_interrupt')
         quit()
     except:
-        if rollbar_configured:
-            rollbar.report_exc_info()
         raise
 

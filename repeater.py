@@ -87,24 +87,6 @@ def fav_tweet(api,reply):
     return True
 
 
-def notify_owner(api,owner,reply):
-    """Send a DM to the owner of the bot"""
-    if not owner:
-        return
-    msg = "{0} wants to be retweeted".format(reply.user.screen_name)
-
-    # sometimes this raises TweepError if we end up sending notifications
-    # for the same user
-    try:
-        api.send_direct_message(user=owner, text=msg)
-    except tweepy.TweepError, e:
-        log(at='notify_error', tweet=reply.id, klass='TweepError', msg="'{0}'".format(str(e)))
-        return False
-
-    log(at='notify_owner', tweet=reply.id)
-    return True
-
-
 def validate_env():
     keys = [
         'TW_USERNAME',
@@ -170,8 +152,6 @@ def main():
             if not reply.favorited: # TODO: log "seen" status
                 prev_seen = "false"
                 status = fav_tweet(api, reply)
-                if status:
-                    notify_owner(api, owner_username, reply)
             else:
                 prev_seen = "true"
 

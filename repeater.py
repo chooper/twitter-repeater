@@ -155,7 +155,7 @@ def main():
     access_secret     = os.environ.get('TW_ACCESS_TOKEN_SECRET')
 
     auth = tweepy.OAuthHandler(consumer_key=consumer_key,
-        consumer_secret=consumer_secret)
+        consumer_secret=consumer_secret, secure=True)
     auth.set_access_token(access_key, access_secret)
 
     api = tweepy.API(auth_handler=auth, secure=True, retry_count=3)
